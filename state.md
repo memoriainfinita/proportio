@@ -22,6 +22,7 @@ Fase: mockup de octubre 2025, funcional e incompleto. Movido de `0_draft` a `1_i
 | Rama git | `main`, repo local sin remoto |
 | Timing de audio | Programado en `frameStart + tHit`, no en `currentTime` |
 | Nombre | `proportio`. Antes `Polyrhythmia` |
+| Licencia | GPL-3.0, archivo `LICENSE` presente |
 
 ## Por qué separado de PULSUS
 
@@ -31,7 +32,6 @@ PULSUS explora lo que produce un sistema. proportio explora cómo suena una arit
 
 ## Pendientes
 
-- [ ] Licencia. El README anterior declaraba GPL-3.0 sin que exista un archivo `LICENSE`
 - [ ] Sin remoto
 - [ ] Presets y persistencia, solo, atajos de teclado, limiter. Todo estaba en la spec original y no se implementó
 
