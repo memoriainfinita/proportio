@@ -3,7 +3,7 @@ created: 2026-08-31
 last_updated: 2026-08-31
 ---
 
-# Polyrhythmia — state
+# proportio — state
 
 Instrumento web: cuadrados que rebotan en horizontal dentro de un marco fijo. Cada impacto contra una pared toca una nota. Cada voz corre a su velocidad o con la velocidad bloqueada a un ratio de una velocidad base.
 
@@ -21,16 +21,16 @@ Fase: mockup de octubre 2025, funcional e incompleto. Movido de `0_draft` a `1_i
 | Spec original | `.archive/mvp_app_web_de_polirritmos_sin_backend.md` |
 | Rama git | `main`, repo local sin remoto |
 | Timing de audio | Programado en `frameStart + tHit`, no en `currentTime` |
+| Nombre | `proportio`. Antes `Polyrhythmia` |
 
 ## Por qué separado de PULSUS
 
 Un periodo exacto necesita una geometría invariante. PULSUS gira y traslada su polígono, así que no la tiene, y eso es lo que lo hace interesante: el patrón emerge de la física. Aquí no hay física — geometría fija, rebote sin pérdida, ratios puestos a mano.
 
-PULSUS explora lo que produce un sistema. Polyrhythmia explora cómo suena una aritmética. Fundirlos degrada a los dos.
+PULSUS explora lo que produce un sistema. proportio explora cómo suena una aritmética. Fundirlos degrada a los dos.
 
 ## Pendientes
 
-- [ ] Decidir el nombre. Es griego y la convención de CODELAB es sustantivo latino. Candidatos: `Numerus`, `Proportio`
 - [ ] Licencia. El README anterior declaraba GPL-3.0 sin que exista un archivo `LICENSE`
 - [ ] Sin remoto
 - [ ] Presets y persistencia, solo, atajos de teclado, limiter. Todo estaba en la spec original y no se implementó

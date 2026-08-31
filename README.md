@@ -1,10 +1,14 @@
-# Polyrhythmia
+# proportio
 
 Squares bounce horizontally inside a resizable frame. Every impact against a wall plays a note.
 
 Each voice can run at its own speed, or lock its speed to a ratio of a base speed. A voice at 3:2 crosses the frame three times for every two crossings of a 1:1 voice, and keeps doing so indefinitely: the frame is fixed and the bounce is perfect, so the period never drifts.
 
 One self-contained HTML file: no server, no build step, no dependencies. Open `index.html` in a browser and press Play.
+
+In Renaissance mensural notation a *proportio* was a sign that made one voice move at a fixed ratio against the tactus, the underlying beat — `dupla` for 2:1, `sesquialtera` for 3:2 — and different voices could carry different ones at the same time. That is exactly this: a base speed, and every voice locked to a ratio of it.
+
+Boethius drew the finer line. *Proportio* compares two terms; a collection of ratios, three terms or more, is *proportionalitas*. Add a third voice and the name stops being quite right — which is as good a definition of polyrhythm as any.
 
 Sound is synthesised with the Web Audio API — one oscillator per hit, no samples. Audio does not start until you press Play, because browsers require a user gesture first.
 
