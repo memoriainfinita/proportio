@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mockup – Polirritmos Visuales</title>
+  <title>Polyrhythmia</title>
   <style>
     :root {
       --bg: #0f0f12; --panel: #17171c; --panel-2:#1f1f26; --text: #e9e9ef; --muted:#9aa0a6; --accent:#5b8cff;
@@ -49,7 +49,7 @@
   <div class="app">
     <!-- Sidebar -->
     <aside class="sidebar">
-      <h1 class="title">Polirritmos – Mockup</h1>
+      <h1 class="title">Polyrhythmia</h1>
 
       <div class="row">
         <button id="playBtn" class="btn primary">▶ Play</button>
@@ -125,7 +125,7 @@
   const rnd = (a,b)=> Math.random()*(b-a)+a;
   const clamp=(v,mi,ma)=> Math.max(mi, Math.min(ma, v));
   const RATIOS = [1,2,3,4,5,6,7,8,9,10,12];
-  const NOTE_LIST = ['C3','D3','E3','G3','A3','B3','C4','D4','E4','F4','G4','A4','B4','C5','D5','E5','F5','G5','A5','B5','C6'];
+  const NOTE_LIST = ['C3','D3','E3','F3','G3','A3','B3','C4','D4','E4','F4','G4','A4','B4','C5','D5','E5','F5','G5','A5','B5','C6'];
 
   // --- Canvas ---
   const frameEl = $('#frame');
@@ -174,7 +174,10 @@
     if(acc==='#') n += 1; else if(acc==='b') n -= 1;
     return 440 * Math.pow(2, n/12);
   }
-  function hitSound(v){
+  // `when` es el instante exacto del impacto, calculado por step() a partir de tHit.
+  // Programarlo en vez de usar currentTime es lo que hace que dos voces que golpean
+  // en el mismo frame conserven su separacion real en vez de sonar a la vez.
+  function hitSound(v, when){
     if(!audio.ctx || !audio.master || v.mute || v.vol<=0) return;
     const ctx = audio.ctx;
     const osc = ctx.createOscillator();
@@ -183,10 +186,10 @@
 
     // Tipo de onda y frecuencia según la voz
     osc.type = v.wave || 'sine';
-    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    const t = Math.max(when, ctx.currentTime);
+    osc.frequency.setValueAtTime(freq, t);
 
     // Envolvente dependiente de la duración seleccionada (v.dur en ms)
-    const t = ctx.currentTime;
     const dur = Math.max(0.04, (v.dur || 180) / 1000); // en segundos
     const atk = Math.min(0.01, dur * 0.2);
     const rel = Math.max(0.03, dur * 0.8);
@@ -503,7 +506,7 @@
   let last = performance.now();
   function loop(now){
     const dt = (now - last) / 1000; last = now;
-    if(state.playing){ step(dt); }
+    if(state.playing){ step(dt, audio.ctx ? audio.ctx.currentTime : 0); }
     // decaimiento de flashes
     for(const v of state.voices){ v.flash = Math.max(0, v.flash - dt*3); }
     state.wallFlash.left = Math.max(0, state.wallFlash.left - dt*2);
@@ -512,7 +515,7 @@
     requestAnimationFrame(loop);
   }
 
-  function step(dt){
+  function step(dt, frameStart){
     for(const v of state.voices){
       // asegurar velocidad correcta si está en modo ratio (por si cambió baseSpeed)
       if(v.mode==='ratio'){
@@ -524,14 +527,14 @@
         const tHit = v.x / Math.abs(v.vx);
         v.x = 0; v.vx = -v.vx; v.dir = v.vx>0? 'right':'left';
         v.x += v.vx * (dt - tHit);
-        v.flash = 1; state.wallFlash.left = 1; hitSound(v);
+        v.flash = 1; state.wallFlash.left = 1; hitSound(v, frameStart + tHit);
       }
       else if(next + v.size >= state.width){
         const dist = (state.width - v.size) - v.x;
         const tHit = dist / Math.abs(v.vx);
         v.x = state.width - v.size; v.vx = -v.vx; v.dir = v.vx>0? 'right':'left';
         v.x += v.vx * (dt - tHit);
-        v.flash = 1; state.wallFlash.right = 1; hitSound(v);
+        v.flash = 1; state.wallFlash.right = 1; hitSound(v, frameStart + tHit);
       }
       else {
         v.x = next;

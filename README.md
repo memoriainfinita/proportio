@@ -8,6 +8,8 @@ One self-contained HTML file: no server, no build step, no dependencies. Open `i
 
 Sound is synthesised with the Web Audio API — one oscillator per hit, no samples. Audio does not start until you press Play, because browsers require a user gesture first.
 
+Hits are not quantised to the frame. The simulation works out the exact fraction of the frame at which each collision happened and schedules the note at that instant, so two voices landing in the same frame keep their real separation instead of firing together. The cost is up to one frame of latency.
+
 ## Per voice
 
 | Control | Range |
@@ -17,7 +19,7 @@ Sound is synthesised with the Web Audio API — one oscillator per hit, no sampl
 | Ratio | `num:den`, each from 1–10 or 12. Speed becomes `base × (num/den)` |
 | Initial direction | left or right |
 | Height (Y) | anywhere within the frame |
-| Note | a fixed list of 21, C3 to C6 |
+| Note | a fixed list of 22, C3 to C6 |
 | Wave | sine, triangle, square, sawtooth |
 | Duration | 40–1200 ms |
 | Volume, Mute, Colour | |
@@ -38,15 +40,12 @@ It opens with two voices: one in Speed mode, and one at 3:2 heading left, square
 
 ## Not implemented
 
-The file is a mockup that was never finished. Missing against its own spec, `mvp_app_web_de_polirritmos_sin_backend.md`:
+The file is a mockup that was never finished. Missing against the spec it was written from:
 
 - **No persistence.** There are no presets and nothing is saved. Closing the tab loses the patch
 - **No solo.** Only mute
 - **No keyboard shortcuts** and no ARIA labelling
 - **No limiter.** Every voice goes straight to a master gain; dense patches can clip
-- **The exact impact time is computed and then discarded.** `step()` works out `tHit`, the fraction of the frame at which the collision happened, but `hitSound()` schedules the note at `ctx.currentTime` regardless. Timing is therefore quantised to the frame, roughly 16 ms of jitter at 60 fps, which is exactly what the ratios are supposed to be precise about
-
-Also: the note list is missing F3, while F4 and F5 are both there. It looks like an oversight rather than a choice.
 
 ## Related
 

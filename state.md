@@ -19,6 +19,8 @@ Fase: mockup de octubre 2025, funcional e incompleto. Movido de `0_draft` a `1_i
 | Mockups anteriores | Los seis en `.archive/` |
 | README | Reescrito, sin sección de licencia ni enlace de demo |
 | Spec original | `.archive/mvp_app_web_de_polirritmos_sin_backend.md` |
+| Rama git | `main`, repo local sin remoto |
+| Timing de audio | Programado en `frameStart + tHit`, no en `currentTime` |
 
 ## Por qué separado de PULSUS
 
@@ -30,11 +32,16 @@ PULSUS explora lo que produce un sistema. Polyrhythmia explora cómo suena una a
 
 - [ ] Decidir el nombre. Es griego y la convención de CODELAB es sustantivo latino. Candidatos: `Numerus`, `Proportio`
 - [ ] Licencia. El README anterior declaraba GPL-3.0 sin que exista un archivo `LICENSE`
-- [ ] Sin repo git ni remoto
-- [ ] Programar el audio en `currentTime + tHit`. `step()` ya calcula `tHit` y `hitSound()` lo ignora. Es el único defecto que ataca directamente la precisión de los ratios, que es la razón de ser del proyecto
-- [ ] Falta `F3` en la lista de notas. `F4` y `F5` sí están: parece descuido
-- [ ] El `<title>` y el `<h1>` siguen diciendo "Mockup – Polirritmos Visuales"
+- [ ] Sin remoto
 - [ ] Presets y persistencia, solo, atajos de teclado, limiter. Todo estaba en la spec original y no se implementó
+
+## Timing de audio
+
+`dt` cubre tiempo ya transcurrido, así que el impacto ocurrió en el pasado y `currentTime + tHit` sonaría igualmente inmediato. `loop()` fija `frameStart` al empezar el frame y `step()` programa cada golpe en `frameStart + tHit`.
+
+Cuesta hasta un frame de latencia y a cambio el espaciado relativo entre golpes es exacto: dos voces que impactan en el mismo frame ya no suenan a la vez. Es el mismo compromiso que PULSUS toma con su `frameStart` y su `offset`.
+
+Corregido el 2026-08-31, junto con la ausencia de `F3` en la lista de notas y el `<title>`/`<h1>`, que aún decían "Mockup – Polirritmos Visuales".
 
 ## Familia
 
