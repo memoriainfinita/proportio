@@ -56,3 +56,7 @@ The file is a mockup that was never finished. Missing against the spec it was wr
 [PULSUS](../PULSUS) is the sibling project: balls bouncing inside a rotating polygon, where the edge decides the note.
 
 The two are opposites on purpose. In PULSUS the pattern emerges from physics — gravity, friction against spinning walls, a moving figure — and no period is ever exact. Here there is no physics at all: the geometry is fixed, the bounce is lossless, and the ratios are set by hand. One explores what a system produces; the other explores what an arithmetic sounds like.
+
+## License
+
+GNU General Public License v3.0 or later. See [LICENSE](LICENSE).
