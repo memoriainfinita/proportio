@@ -152,7 +152,14 @@
     const ctx = new Ctor();
     const master = ctx.createGain();
     master.gain.value = 0.9;
-    master.connect(ctx.destination);
+    // Limiter global: varias voces golpeando en el mismo instante suman por encima de 0 dBFS
+    const limiter = ctx.createDynamicsCompressor();
+    limiter.threshold.value = -6;
+    limiter.knee.value = 0;
+    limiter.ratio.value = 20;
+    limiter.attack.value = 0.003;
+    limiter.release.value = 0.1;
+    master.connect(limiter).connect(ctx.destination);
     audio.ctx = ctx; audio.master = master;
     // iOS unlock: reproducir un click inaudible
     const osc = ctx.createOscillator();
