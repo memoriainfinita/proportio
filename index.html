@@ -111,7 +111,7 @@
   // --- Estado ---
   const state = {
     playing: false,
-    voices: [], // {id, x, y, vx, size, color, note, vol, mute, dir, flash, mode, ratioNum, ratioDen}
+    voices: [], // {id, x, y, vx, size, color, note, vol, mute, solo, dir, flash, mode, ratioNum, ratioDen}
     nextId: 1,
     width: 720,
     height: 260,
@@ -181,11 +181,16 @@
     if(acc==='#') n += 1; else if(acc==='b') n -= 1;
     return 440 * Math.pow(2, n/12);
   }
+  // Con alguna voz en solo, solo suenan las que están en solo. Mute gana siempre.
+  function audible(v){
+    if(v.mute) return false;
+    return !state.voices.some(x=>x.solo) || v.solo;
+  }
   // `when` es el instante exacto del impacto, calculado por step() a partir de tHit.
   // Programarlo en vez de usar currentTime es lo que hace que dos voces que golpean
   // en el mismo frame conserven su separacion real en vez de sonar a la vez.
   function hitSound(v, when){
-    if(!audio.ctx || !audio.master || v.mute || v.vol<=0) return;
+    if(!audio.ctx || !audio.master || !audible(v) || v.vol<=0) return;
     const ctx = audio.ctx;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
@@ -310,6 +315,10 @@
             <span class="label">Mute</span>
             <input type="checkbox" ${v.mute? 'checked':''} data-act="mute" data-id="${v.id}">
           </label>
+          <label class="field">
+            <span class="label">Solo</span>
+            <input type="checkbox" ${v.solo? 'checked':''} data-act="solo" data-id="${v.id}">
+          </label>
         </div>
       `;
       voicesEl.appendChild(el);
@@ -346,6 +355,7 @@
       if(span) span.textContent = v.vol.toFixed(2);
     }
     if(act==='mute') v.mute = e.target.checked;
+    if(act==='solo') v.solo = e.target.checked;
     if(act==='y') {
       v.y = clamp(+e.target.value, 0, state.height - v.size);
       const span = document.getElementById(`val-y-${id}`);
@@ -459,7 +469,8 @@
       color: params.color || `hsl(${Math.floor(rnd(0,360))} 80% 60%)`,
       note: params.note || 'C4',
       vol: params.vol ?? 0.8,
-      mute: false,
+      mute: params.mute ?? false,
+      solo: params.solo ?? false,
       dir,
       flash: 0,
       mode,
