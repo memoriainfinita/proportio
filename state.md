@@ -1,6 +1,6 @@
 ---
 created: 2026-08-31
-last_updated: 2026-08-31
+last_updated: 2026-09-28
 ---
 
 # proportio — state
@@ -23,6 +23,12 @@ Fase: mockup de octubre 2025, funcional e incompleto. Movido de `0_draft` a `1_i
 | Timing de audio | Programado en `frameStart + tHit`, no en `currentTime` |
 | Nombre | `proportio`. Antes `Polyrhythmia` |
 | Licencia | GPL-3.0, archivo `LICENSE` presente |
+| Limiter | `DynamicsCompressor` entre `master` y `destination`: umbral -6 dB, ratio 20, ataque 3 ms, release 100 ms |
+| Solo | Con alguna voz en solo solo suenan esas. Mute gana siempre |
+| Presets | localStorage `proportio.presets`, objeto por nombre. Guardan escenario, velocidad base y voces, sin `x` ni destellos. Al cargar se sanea campo a campo |
+| Sesión al recargar | No se guarda sola: solo lo que se guarde como preset |
+| Atajos | Espacio alterna Play/Pausa. N añade voz. Supr/Retroceso, S y M actúan sobre la voz seleccionada. Ignorados mientras se escribe en un campo |
+| Selección de voz | Clic en el cuadrado, o foco en cualquier control de su tarjeta |
 
 ## Por qué separado de PULSUS
 
@@ -32,8 +38,8 @@ PULSUS explora lo que produce un sistema. proportio explora cómo suena una arit
 
 ## Pendientes
 
-- [ ] Sin remoto
-- [ ] Presets y persistencia, solo, atajos de teclado, limiter. Todo estaba en la spec original y no se implementó
+- [ ] Sin remoto. Se crea al pasar a `2_finished`
+- [ ] Probar en Firefox: presets, solo, atajos y limiter verificados el 2026-09-28 solo en Chrome, con Playwright
 
 ## Timing de audio
 
