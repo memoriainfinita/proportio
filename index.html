@@ -73,6 +73,19 @@
         <input id="baseInput" type="range" min="40" max="600" step="1" value="200" />
       </div>
 
+      <div class="field">
+        <label class="label" for="presetName">Presets</label>
+        <div class="row">
+          <input id="presetName" type="text" placeholder="Nombre" style="flex:1; min-width:0"/>
+          <button id="presetSave" class="btn">Guardar</button>
+        </div>
+        <div class="row">
+          <select id="presetList" aria-label="Presets guardados" style="flex:1; min-width:0"></select>
+          <button id="presetLoad" class="btn">Cargar</button>
+          <button id="presetDel" class="btn">Borrar</button>
+        </div>
+      </div>
+
       <div class="sep"></div>
 
       <div class="row" style="justify-content:space-between">
@@ -494,6 +507,97 @@
     centerPositions();
   }
 
+  // --- Presets (localStorage) ---
+  // Un preset guarda la configuración, no el instante: sin posición x ni destellos.
+  const PRESET_KEY = 'proportio.presets';
+  const WAVES = ['sine','triangle','square','sawtooth'];
+  function readPresets(){
+    try {
+      const all = JSON.parse(localStorage.getItem(PRESET_KEY) || '{}');
+      return (all && typeof all==='object' && !Array.isArray(all)) ? all : {};
+    } catch { return {}; }
+  }
+  function writePresets(all){
+    try { localStorage.setItem(PRESET_KEY, JSON.stringify(all)); return true; }
+    catch { return false; }
+  }
+  function snapshot(name){
+    return {
+      version: 1,
+      width: state.width, height: state.height, baseSpeed: state.baseSpeed,
+      voices: state.voices.map(v=>({
+        y: v.y, speed: Math.abs(v.vx), dir: v.dir, mode: v.mode,
+        ratioNum: v.ratioNum, ratioDen: v.ratioDen,
+        color: v.color, note: v.note, wave: v.wave, dur: v.dur,
+        vol: v.vol, mute: v.mute, solo: v.solo,
+      })),
+      meta: { name, updatedAt: Date.now() },
+    };
+  }
+  function validPreset(p){
+    return p && p.version===1
+      && [p.width, p.height, p.baseSpeed].every(Number.isFinite)
+      && Array.isArray(p.voices)
+      && p.voices.every(v=> v && typeof v==='object' && Number.isFinite(v.speed));
+  }
+  function applyPreset(p){
+    state.playing = false;
+    state.width = clamp(p.width, 200, 1400);
+    state.height = clamp(p.height, 120, 800);
+    state.baseSpeed = clamp(p.baseSpeed, 40, 600);
+    $('#wInput').value = state.width; $('#hInput').value = state.height;
+    $('#baseInput').value = state.baseSpeed; $('#baseVal').textContent = state.baseSpeed.toFixed(0);
+    state.voices = [];
+    resizeCanvas();
+    // Campos saneados uno a uno: un valor fuera de rango en osc.type o en la nota rompería el audio
+    p.voices.forEach(v=> addVoice({
+      y: clamp(+v.y || 0, 0, state.height - 18),
+      speed: clamp(v.speed, 20, 600),
+      dir: v.dir==='left' ? 'left' : 'right',
+      mode: v.mode==='ratio' ? 'ratio' : 'speed',
+      ratioNum: RATIOS.includes(v.ratioNum) ? v.ratioNum : 1,
+      ratioDen: RATIOS.includes(v.ratioDen) ? v.ratioDen : 1,
+      color: typeof v.color==='string' ? v.color : undefined,
+      note: NOTE_LIST.includes(v.note) ? v.note : 'C4',
+      wave: WAVES.includes(v.wave) ? v.wave : 'sine',
+      dur: clamp(+v.dur || 180, 40, 1200),
+      vol: clamp(Number.isFinite(v.vol) ? v.vol : 0.8, 0, 1),
+      mute: !!v.mute,
+      solo: !!v.solo,
+    }));
+    centerPositions();
+  }
+  function refreshPresetList(selected){
+    const names = Object.keys(readPresets()).sort((a,b)=> a.localeCompare(b));
+    const list = $('#presetList');
+    list.innerHTML = '';
+    if(!names.length) list.add(new Option('Sin presets', ''));
+    // new Option en vez de interpolar HTML: el nombre lo escribe el usuario
+    names.forEach(n=> list.add(new Option(n, n)));
+    if(selected && names.includes(selected)) list.value = selected;
+  }
+  $('#presetSave').addEventListener('click', ()=>{
+    const name = $('#presetName').value.trim();
+    if(!name){ $('#presetName').focus(); return; }
+    const all = readPresets();
+    all[name] = snapshot(name);
+    if(writePresets(all)) refreshPresetList(name);
+  });
+  $('#presetLoad').addEventListener('click', ()=>{
+    const name = $('#presetList').value;
+    const p = readPresets()[name];
+    if(!validPreset(p)) return;
+    applyPreset(p);
+    $('#presetName').value = name;
+  });
+  $('#presetDel').addEventListener('click', ()=>{
+    const name = $('#presetList').value;
+    if(!name) return;
+    const all = readPresets();
+    delete all[name];
+    if(writePresets(all)) refreshPresetList();
+  });
+
   // --- Resizable frame (drag corners) ---
   let drag = null;
   $$('.dr').forEach(h=>{
@@ -617,6 +721,7 @@
   addVoice({ y: (state.height-18)/2 + 26, dir: 'left', mode:'ratio', ratioNum:3, ratioDen:2, wave:'square', note:'E4', dur:200 });
   centerPositions();
   updateBPMLabel();
+  refreshPresetList();
   requestAnimationFrame(loop);
 </script>
 </body>
