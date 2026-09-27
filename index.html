@@ -27,6 +27,7 @@
     select, input[type="number"], input[type="text"] { background:#202028; color:var(--text); border:1px solid #34343e; border-radius:10px; padding:8px; }
     .voices { display:flex; flex-direction:column; gap:10px; }
     .voice { background:#1a1a22; border:1px solid #2b2b35; border-radius:14px; padding:10px; }
+    .voice.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
     .voice-header { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; }
     .chip { display:inline-flex; align-items:center; gap:6px; font-size:12px; color:#c7cad1; background:#242430; border:1px solid #2f2f3a; padding:4px 8px; border-radius:999px; }
     .canvas-wrap { position:relative; height: 100%; padding:16px; }
@@ -131,6 +132,8 @@
     wallFlash: { left: 0, right: 0 },
     baseSpeed: 200,
   };
+  // Voz sobre la que actúan Supr, S y M. Se elige con clic en el cuadrado o en su tarjeta.
+  let selectedId = null;
 
   // --- Utiles ---
   const $ = sel => document.querySelector(sel);
@@ -253,7 +256,8 @@
     state.voices.forEach(v=>{
       const currentSpeed = v.mode==='ratio' ? (state.baseSpeed * (v.ratioNum/v.ratioDen)) : Math.abs(v.vx);
       const el = document.createElement('div');
-      el.className = 'voice';
+      el.className = 'voice' + (v.id===selectedId ? ' selected' : '');
+      el.dataset.voice = v.id;
       el.innerHTML = `
         <div class="voice-header">
           <span class="chip"><span style="width:10px;height:10px;border-radius:2px;display:inline-block;background:${v.color}"></span> Voz #${v.id}</span>
@@ -399,14 +403,29 @@
     }
   });
 
+  // Seleccionar sin volver a renderizar: un render a mitad de clic cerraría el select que se está abriendo
+  function selectVoice(id){
+    selectedId = id;
+    voicesEl.querySelectorAll('.voice').forEach(c=> c.classList.toggle('selected', +c.dataset.voice===id));
+  }
+  function removeVoice(id){
+    state.voices = state.voices.filter(v=>v.id!==id);
+    if(selectedId===id) selectedId = null;
+    renderVoicesUI();
+  }
+
+  // focusin cubre llegar a un control con Tab; click, el fondo de la tarjeta, que no toma foco
+  voicesEl.addEventListener('focusin', (e)=>{
+    const card = e.target.closest('.voice');
+    if(card) selectVoice(+card.dataset.voice);
+  });
   voicesEl.addEventListener('click', (e)=>{
+    const card = e.target.closest('.voice');
+    if(card) selectVoice(+card.dataset.voice);
     const id = +e.target.getAttribute('data-id');
     const act = e.target.getAttribute('data-act');
     if(!id || !act) return;
-    if(act==='del') {
-      state.voices = state.voices.filter(v=>v.id!==id);
-      renderVoicesUI();
-    }
+    if(act==='del') removeVoice(id);
     if(act==='dup') {
       const src = state.voices.find(v=>v.id===id);
       if(!src) return;
@@ -428,7 +447,8 @@
 
   // --- Acciones globales ---
   $('#addBtn').addEventListener('click', ()=> addVoice());
-  $('#playBtn').addEventListener('click', ()=> { state.playing=true; initAudio(); if(audio.ctx && audio.ctx.state==='suspended'){ audio.ctx.resume(); } });
+  function play(){ state.playing=true; initAudio(); if(audio.ctx && audio.ctx.state==='suspended'){ audio.ctx.resume(); } }
+  $('#playBtn').addEventListener('click', play);
   $('#pauseBtn').addEventListener('click', ()=> state.playing=false);
   $('#stopBtn').addEventListener('click', stopAndCenter);
   $('#centerBtn').addEventListener('click', centerPositions);
@@ -507,6 +527,36 @@
     centerPositions();
   }
 
+  // --- Selección en el lienzo ---
+  canvas.addEventListener('click', e=>{
+    // El canvas se dibuja a tamaño CSS 1:1, así que offsetX/Y son coordenadas de escenario.
+    // Margen de 4 px: el cuadrado mide 18 y se mueve. La última voz dibujada queda encima.
+    const pad = 4;
+    const hit = [...state.voices].reverse().find(v=>
+      e.offsetX >= v.x - pad && e.offsetX <= v.x + v.size + pad &&
+      e.offsetY >= v.y - pad && e.offsetY <= v.y + v.size + pad);
+    selectVoice(hit ? hit.id : null);
+  });
+
+  // --- Atajos de teclado ---
+  // Espacio alterna Play/Pausa. N añade voz. Supr/Retroceso, S y M actúan sobre la voz seleccionada.
+  document.addEventListener('keydown', e=>{
+    if(e.ctrlKey || e.metaKey || e.altKey) return;
+    const t = e.target;
+    const typing = t.matches('select, textarea, input:not([type="checkbox"]):not([type="range"]):not([type="color"])');
+    if(typing) return;
+    const v = state.voices.find(x=>x.id===selectedId);
+    const key = e.key.length===1 ? e.key.toLowerCase() : e.key;
+    if(key===' '){ state.playing ? (state.playing=false) : play(); }
+    else if(key==='n'){ const nv = addVoice(); selectVoice(nv.id); }
+    else if((key==='Delete' || key==='Backspace') && v){ removeVoice(v.id); }
+    else if(key==='s' && v){ v.solo = !v.solo; renderVoicesUI(); }
+    else if(key==='m' && v){ v.mute = !v.mute; renderVoicesUI(); }
+    else return;
+    // Sin esto, Espacio sobre un botón o una casilla con foco también la activaría
+    e.preventDefault();
+  });
+
   // --- Presets (localStorage) ---
   // Un preset guarda la configuración, no el instante: sin posición x ni destellos.
   const PRESET_KEY = 'proportio.presets';
@@ -548,6 +598,7 @@
     $('#wInput').value = state.width; $('#hInput').value = state.height;
     $('#baseInput').value = state.baseSpeed; $('#baseVal').textContent = state.baseSpeed.toFixed(0);
     state.voices = [];
+    selectedId = null;
     resizeCanvas();
     // Campos saneados uno a uno: un valor fuera de rango en osc.type o en la nota rompería el audio
     p.voices.forEach(v=> addVoice({
@@ -704,6 +755,11 @@
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(v.x|0, v.y|0, v.size, v.size);
         ctx.globalAlpha = 1;
+      }
+      if(v.id===selectedId){
+        ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect((v.x|0) - 3.5, (v.y|0) - 3.5, v.size + 7, v.size + 7);
       }
     }
 
