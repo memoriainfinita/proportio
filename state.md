@@ -29,6 +29,7 @@ Fase: mockup de octubre 2025, funcional e incompleto. Movido de `0_draft` a `1_i
 | Sesión al recargar | No se guarda sola: solo lo que se guarde como preset |
 | Atajos | Espacio alterna Play/Pausa. N añade voz. Supr/Retroceso, S y M actúan sobre la voz seleccionada. Ignorados mientras se escribe en un campo |
 | Selección de voz | Clic en el cuadrado, o foco en cualquier control de su tarjeta |
+| Verificación | Limiter, solo, presets y atajos: Playwright en Chrome y prueba manual del usuario en Firefox, 2026-09-28 |
 
 ## Por qué separado de PULSUS
 
@@ -39,7 +40,6 @@ PULSUS explora lo que produce un sistema. proportio explora cómo suena una arit
 ## Pendientes
 
 - [ ] Sin remoto. Se crea al pasar a `2_finished`
-- [ ] Probar en Firefox: presets, solo, atajos y limiter verificados el 2026-09-28 solo en Chrome, con Playwright
 
 ## Timing de audio
 
