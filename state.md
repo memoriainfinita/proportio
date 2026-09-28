@@ -7,7 +7,7 @@ last_updated: 2026-09-28
 
 Instrumento web: cuadrados que rebotan en horizontal dentro de un marco fijo. Cada impacto contra una pared toca una nota. Cada voz corre a su velocidad o con la velocidad bloqueada a un ratio de una velocidad base.
 
-Fase: mockup de octubre 2025, funcional e incompleto. Movido de `0_draft` a `1_in-progress` el 2026-08-31.
+Fase: terminado y publicado el 2026-09-28. Nació de un mockup de octubre 2025.
 
 ## Decisiones cerradas
 
@@ -17,9 +17,11 @@ Fase: mockup de octubre 2025, funcional e incompleto. Movido de `0_draft` a `1_i
 | Motor compartido | Se extrae cuando haya un tercer consumidor. `VIBE` es el candidato |
 | Base viva | `index.html`, copia del mockup `(5)` |
 | Mockups anteriores | Los seis en `.archive/` |
-| README | Reescrito, sin sección de licencia ni enlace de demo |
+| README | Canon de los proyectos publicados: badges de licencia y stack, enlace a la demo, captura en `docs/proportio-demo.png`, License y Credits |
 | Spec original | `.archive/mvp_app_web_de_polirritmos_sin_backend.md` |
-| Rama git | `main`, repo local sin remoto |
+| Repo | `memoriainfinita/proportio`, público, rama `main` |
+| Publicación | GitHub Pages desde `main`, raíz, rama tal cual (legacy). Un push a `main` actualiza la web |
+| Captura | 1440 de ancho a escala 2, con el panel lateral entero sin scroll. Preset de demo con dos voces a 1:1 y 3:2 |
 | Timing de audio | Programado en `frameStart + tHit`, no en `currentTime` |
 | Nombre | `proportio`. Antes `Polyrhythmia` |
 | Licencia | GPL-3.0, archivo `LICENSE` presente |
@@ -36,10 +38,6 @@ Fase: mockup de octubre 2025, funcional e incompleto. Movido de `0_draft` a `1_i
 Un periodo exacto necesita una geometría invariante. PULSUS gira y traslada su polígono, así que no la tiene, y eso es lo que lo hace interesante: el patrón emerge de la física. Aquí no hay física — geometría fija, rebote sin pérdida, ratios puestos a mano.
 
 PULSUS explora lo que produce un sistema. proportio explora cómo suena una aritmética. Fundirlos degrada a los dos.
-
-## Pendientes
-
-- [ ] Sin remoto. Se crea al pasar a `2_finished`
 
 ## Timing de audio
 
