@@ -6,7 +6,7 @@
 
 Squares bounce horizontally inside a resizable frame. Every impact against a wall plays a note.
 
-**[Open it](https://memoriainfinita.github.io/proportio/)** and press Play.
+**[Open it](https://memoriainfinita.github.io/proportio/)** and press Play. **[Guide](docs/guide/README.md)**: how to play it.
 
 ![proportio playing a preset with two voices locked to 1:1 and 3:2, the second one selected](docs/proportio-demo.png)
 
